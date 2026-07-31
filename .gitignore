@@ -1,0 +1,6 @@
+target/
+.codegraph/
+.env
+.env.*
+!.env.coolify.example
+.secrets/
