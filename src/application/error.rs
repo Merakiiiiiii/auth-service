@@ -1,0 +1,49 @@
+use thiserror::Error;
+
+#[derive(Clone, Copy, Debug, Error, Eq, PartialEq)]
+pub enum AuthError {
+    #[error("AUTH_INVALID_EMAIL")]
+    InvalidEmail,
+    #[error("AUTH_INVALID_DISPLAY_NAME")]
+    InvalidDisplayName,
+    #[error("AUTH_INVALID_AVATAR_URL")]
+    InvalidAvatarUrl,
+    #[error("AUTH_INVALID_BIO")]
+    InvalidBio,
+    #[error("AUTH_INVALID_LOCALE")]
+    InvalidLocale,
+    #[error("AUTH_INVALID_TIMEZONE")]
+    InvalidTimezone,
+    #[error("AUTH_PASSWORD_POLICY")]
+    PasswordPolicy,
+    #[error("AUTH_EMAIL_ALREADY_EXISTS")]
+    EmailAlreadyExists,
+    #[error("AUTH_INVALID_VERIFICATION_TOKEN")]
+    InvalidVerificationToken,
+    #[error("AUTH_INVALID_EMAIL_CHANGE_TOKEN")]
+    InvalidEmailChangeToken,
+    #[error("AUTH_INVALID_CREDENTIALS")]
+    InvalidCredentials,
+    #[error("AUTH_EMAIL_NOT_VERIFIED")]
+    EmailNotVerified,
+    #[error("AUTH_ACCOUNT_LOCKED")]
+    AccountLocked,
+    #[error("AUTH_INVALID_REFRESH_TOKEN")]
+    InvalidRefreshToken,
+    #[error("AUTH_INVALID_RESET_TOKEN")]
+    InvalidResetToken,
+    #[error("AUTH_USER_NOT_FOUND")]
+    UserNotFound,
+    #[error("AUTH_SESSION_NOT_FOUND")]
+    SessionNotFound,
+    #[error("AUTH_VERSION_CONFLICT")]
+    VersionConflict,
+    #[error("AUTH_INVALID_TOKEN")]
+    InvalidToken,
+    #[error("AUTH_SESSION_REVOKED")]
+    SessionRevoked,
+    #[error("AUTH_DATABASE_UNAVAILABLE")]
+    RepositoryUnavailable,
+    #[error("AUTH_INTERNAL")]
+    Internal,
+}

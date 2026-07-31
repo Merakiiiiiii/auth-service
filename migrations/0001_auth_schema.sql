@@ -1,0 +1,18 @@
+CREATE EXTENSION IF NOT EXISTS citext;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE TYPE user_status AS ENUM ('pending_verification','active','suspended','deleted');
+CREATE TABLE users(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),normalized_email citext NOT NULL UNIQUE,display_name varchar(120) NOT NULL,password_hash text NOT NULL,status user_status NOT NULL DEFAULT 'pending_verification',roles text[] NOT NULL DEFAULT ARRAY['user']::text[],email_verified_at timestamptz,failed_login_count integer NOT NULL DEFAULT 0 CHECK(failed_login_count>=0),locked_until timestamptz,created_at timestamptz NOT NULL DEFAULT now(),updated_at timestamptz NOT NULL DEFAULT now(),deleted_at timestamptz);
+CREATE TABLE auth_idempotency_keys(request_id uuid PRIMARY KEY,operation varchar(80) NOT NULL,request_hash bytea NOT NULL,response_payload jsonb NOT NULL,created_at timestamptz NOT NULL DEFAULT now(),expires_at timestamptz NOT NULL);
+CREATE TABLE user_sessions(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),user_id uuid NOT NULL REFERENCES users(id) ON DELETE RESTRICT,token_family_id uuid NOT NULL,refresh_token_hash bytea NOT NULL UNIQUE,previous_refresh_token_hash bytea,device_name varchar(160),user_agent varchar(512),ip_address inet,expires_at timestamptz NOT NULL,last_used_at timestamptz,revoked_at timestamptz,revoke_reason varchar(120),created_at timestamptz NOT NULL DEFAULT now(),updated_at timestamptz NOT NULL DEFAULT now(),CHECK(expires_at>created_at));
+CREATE INDEX idx_user_sessions_user_active ON user_sessions(user_id,expires_at) WHERE revoked_at IS NULL;
+CREATE INDEX idx_user_sessions_family ON user_sessions(token_family_id);
+CREATE TABLE email_verification_tokens(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,token_hash bytea NOT NULL UNIQUE,expires_at timestamptz NOT NULL,consumed_at timestamptz,created_at timestamptz NOT NULL DEFAULT now(),CHECK(expires_at>created_at));
+CREATE INDEX idx_email_verification_tokens_user ON email_verification_tokens(user_id,expires_at);
+CREATE TABLE password_reset_tokens(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,token_hash bytea NOT NULL UNIQUE,expires_at timestamptz NOT NULL,consumed_at timestamptz,created_at timestamptz NOT NULL DEFAULT now(),CHECK(expires_at>created_at));
+CREATE INDEX idx_password_reset_tokens_user ON password_reset_tokens(user_id,expires_at);
+CREATE TABLE auth_audit_events(id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,event_type varchar(100) NOT NULL,user_id uuid REFERENCES users(id) ON DELETE SET NULL,session_id uuid REFERENCES user_sessions(id) ON DELETE SET NULL,ip_address inet,user_agent varchar(512),metadata jsonb NOT NULL DEFAULT '{}'::jsonb,occurred_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX idx_auth_audit_events_user_time ON auth_audit_events(user_id,occurred_at DESC);
+CREATE INDEX idx_auth_audit_events_type_time ON auth_audit_events(event_type,occurred_at DESC);
+CREATE OR REPLACE FUNCTION set_updated_at() RETURNS trigger AS $$ BEGIN NEW.updated_at=now(); RETURN NEW; END; $$ LANGUAGE plpgsql;
+CREATE TRIGGER users_set_updated_at BEFORE UPDATE ON users FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+CREATE TRIGGER user_sessions_set_updated_at BEFORE UPDATE ON user_sessions FOR EACH ROW EXECUTE FUNCTION set_updated_at();

@@ -1,0 +1,56 @@
+[package]
+name = "auth-service"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+platform-proto = { path = "../platform-proto" }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal", "time"] }
+tokio-util = "0.7"
+tonic = "0.14"
+tonic-health = "0.14"
+tonic-reflection = "0.14"
+prost-types = "0.14"
+axum = "0.8"
+tower-http = { version = "0.6", features = ["trace"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+argon2 = "0.5"
+jsonwebtoken = "9"
+rand_core = { version = "0.6", features = ["getrandom"] }
+sha2 = "0.10"
+chrono = { version = "0.4", features = ["serde"] }
+dotenvy = "0.15"
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json", "migrate", "macros"] }
+base64 = "0.22"
+subtle = "2"
+async-trait = "0.1"
+url = "2"
+
+[lints.rust]
+unsafe_code = "forbid"
+unused_must_use = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+pedantic = { level = "deny", priority = -1 }
+nursery = { level = "deny", priority = -1 }
+too_many_lines = "deny"
+too_many_arguments = "deny"
+excessive_nesting = "deny"
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+unimplemented = "deny"
+dbg_macro = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+module_name_repetitions = "allow"
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
